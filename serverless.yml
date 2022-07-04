@@ -18,12 +18,11 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - "Fn::GetAtt": [MenuTable, Arn]
+        - arn:aws:dynamodb:*:*:table/MenuTable
 
 functions:
   addMenu:
     handler: src/handlers/addMenu.handler
-    description: Post method to add new commands to the list of commands
     events:
       - httpApi:
           path: /
@@ -31,7 +30,6 @@ functions:
 
   fetchMenus:
     handler: src/handlers/fetchMenus.handler
-    description: Get method to scan dynamodb and return all the commands in the database
     events:
       - httpApi:
           path: /menus
@@ -39,7 +37,6 @@ functions:
 
   fetchMenu:
     handler: src/handlers/fetchMenu.handler
-    description: Get method with inut as specific 'id' to get the detais of the specific item
     events:
       - httpApi:
           path: /menu/{id}
@@ -47,7 +44,6 @@ functions:
 
   updateMenu:
     handler: src/handlers/updateMenu.handler
-    description: Update method to modify the commands if there are any changes
     events:
       - httpApi:
           path: /menu/{id}
@@ -55,7 +51,6 @@ functions:
 
   deleteMenu:
     handler: src/handlers/deleteMenu.handler
-    description: Delete method to clear the item specified in by it's "id" number
     events:
       - httpApi:
           path: /menu/{id}
