@@ -1,92 +1,67 @@
-<!--
-title: 'AWS Simple HTTP Endpoint example in NodeJS'
-description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# CRUD Rest API for a Home Food Delivery Service
 
-# Serverless Framework Node HTTP API on AWS
+This app is built in the context of a restaurant, for example, that wants to improve the customer satisfaction in their home delivery services. So they are using the **CRUD** (Create, Read, Update and Delete) methods to provide customers with much flexibility around the menu customers want to order. The customer is able to **"Create"** their order by providing their name, adress and the type of food they want the restaurant to deliver to them. They can **"Update"** the dish they want incase they change their minds within the day.They can **"Delete"** the order completely, say within a defined time period.And if they want to, thay can also **"Read"** what they have ordered within the day, or Scan through the whole database of food orders, to see what others are ordering.
 
-This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.
+As seen in the diagram below, the API Gateway receives all these 05 types of requests from the customers, and based on each request,it does the role of channeing them to the dedicated lambda function,for the type of request. So the lamda functions are each doing one of the folowing:
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
+- Reading a single item (fetchMenu Lambda Function)
+- Reading all items (fetchMenus Lambda Function)
+- Creating a new item (addMenu Lambda Function)
+- Updating an existing order (updateMenu Lambda Function)
+- Deleting an existing order (deleteMenu Lambda Function)
 
-## Usage
+The code for all these lambda functions can be found in the ["handlers"](https://github.com/Bandolo/Serverless-Menu-App/tree/master/src/handlers) folderr.Taking a look at the code will guide you on what to expect like payload to submit, when testing these endpoints.
 
-### Deployment
+![CRUD Architecture with API Gateway, Lambdas and Dynamodb](https://github.com/Bandolo/Serverless-Menu-App/blob/master/img/CRUD_Architecture.png)
 
-```
-$ serverless deploy
-```
+Below is the picture of the local testing of the endpoints using Postman. All the methods are working perfectly well.And each method requires a slightly different payload to provide the expected output.
 
-After deploying, you should see output similar to:
+![Testing APIs with Postman](https://github.com/Bandolo/Serverless-Menu-App/blob/master/img/Testing_with_Postman.PNG)
 
-```bash
-Deploying aws-node-http-api-project to stage dev (us-east-1)
+Below is the screenshot from GitHub Actions on the CI/CD Pipeline. The app is deployed upon a push to the Master branch.The developer branch does not have this option deploying the app.The developer branch is used for testing.
+So after going through the integration tests successfully, in the maaster branch, Github Actions will deploy the app to your AWS account.This means, if the tests fails, it will not be deployed.
+w
+![Github Actions Integrtion Testing](./img/GitHub_Actions_Integration_Testing.PNG)
 
-✔ Service deployed to stack aws-node-http-api-project-dev (152s)
+## Pre-requisites to run the code successfully
 
-endpoint: GET - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/
-functions:
-  hello: aws-node-http-api-project-dev-hello (1.9 kB)
-```
+- AWS Credentials Configuration
+- Nodejs installation
+- A basic knowledge of Node.JS
+- A basic notion of Rest APIs
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [http event docs](https://www.serverless.com/framework/docs/providers/aws/events/apigateway/).
+## How to use the code
 
-### Invocation
+- Downloading and storing in your local folder:
 
-After successful deployment, you can call the created application via HTTP:
+  While on GitHub, go to the main page of the project's repository and above the list of the 08 files in this project, click on the green **Code** button.Copy the url that appears (the default is HTTPS). Next, open Git Bash, ensure you change your current working directory to the destination folder you intend to clone the code into. Then type the following command and then press **Enter**
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
+```log
+$ git clone https://github.com/Bandolo/Serverless-Menu-App.git
 ```
 
-Which should result in response similar to the following (removed `input` content for brevity):
+- Installing the packages and deploying the app:
+  Next, cd into the folder titled "Menu" and while there you should run run the command to install the Serverless Framework.
 
-```json
-{
-  "message": "Go Serverless v2.0! Your function executed successfully!",
-  "input": {
-    ...
-  }
-}
+```log
+ $ cd Menu
+ $ npm install -g serverless
 ```
 
-### Local development
+You can now go ahead and deploy the Serverless app with the following command
 
-You can invoke your function locally by using the following command:
-
-```bash
-serverless invoke local --function hello
+```log
+ $ serverless deploy
 ```
 
-Which should result in response similar to the following:
+As seen in the infrastructure diagram above, the app will create an API Gateway, 05 lambda functions and a dynamodb table, which will be deployed in the "us-east-2 region" in your AWS account.
 
-```
-{
-  "statusCode": 200,
-  "body": "{\n  \"message\": \"Go Serverless v3.0! Your function executed successfully!\",\n  \"input\": \"\"\n}"
-}
-```
+## Testing the endpoints locally
 
+The Serverless Framework will provide you with 05 request links. And you could test them using Postman with payloads depending on the lambda function in question.Again a basic knowedge about NodeJs and Rest API's, along with reviewing each of the relevant lamda codes, will help you test each of the endpoints successfully.
 
-Alternatively, it is also possible to emulate API Gateway and Lambda locally by using `serverless-offline` plugin. In order to do that, execute the following command:
-
-```bash
-serverless plugin install -n serverless-offline
-```
-
-It will add the `serverless-offline` plugin to `devDependencies` in `package.json` file as well as will add it to `plugins` in `serverless.yml`.
-
-After installation, you can start local emulation with:
-
-```
-serverless offline
-```
-
-To learn more about the capabilities of `serverless-offline`, please refer to its [GitHub repository](https://github.com/dherault/serverless-offline).
+1. GET (Getting a single element using the id)
+2. GET (Scanning the database to get all items)
+3. POST (For adding single elements to the dynanamdb table)
+4. UPDATE ( For modifying an existing meal order based on the item 'id')
+5. DELETE (For deleteting an existing order based on the item 'id')
