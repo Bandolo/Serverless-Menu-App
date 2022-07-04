@@ -1,0 +1,71 @@
+service: Menu
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: us-east-2
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [MenuTable, Arn]
+
+functions:
+  addMenu:
+    handler: src/handlers/addMenu.handler
+    events:
+      - httpApi:
+          path: /
+          method: post
+
+  fetchMenus:
+    handler: src/handlers/fetchMenus.handler
+    events:
+      - httpApi:
+          path: /menus
+          method: get
+
+  fetchMenu:
+    handler: src/handlers/fetchMenu.handler
+    events:
+      - httpApi:
+          path: /menu/{id}
+          method: get
+
+  updateMenu:
+    handler: src/handlers/updateMenu.handler
+    events:
+      - httpApi:
+          path: /menu/{id}
+          method: put
+
+  deleteMenu:
+    handler: src/handlers/deleteMenu.handler
+    events:
+      - httpApi:
+          path: /menu/{id}
+          method: delete
+
+resources:
+  Resources:
+    MenuTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: MenuTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
